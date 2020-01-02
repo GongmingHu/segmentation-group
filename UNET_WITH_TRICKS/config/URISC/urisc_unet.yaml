@@ -1,0 +1,65 @@
+DATA:
+  data_root: /data/ss/URISC/DATASET/
+  train_image_dir: /data/ss/URISC/DATASET/IMAGE/train/
+  txt_save_dir: /data/ss/URISC/CODE/FullVersion/dataset/
+  classes: 1
+  mean: [0.485, 0.456, 0.406]  # [0.485, 0.456, 0.406]  [0.52011591, 0.52011591, 0.52011591]
+  std: [0.229, 0.224, 0.225]  # [0.229, 0.224, 0.225]  [0.18995794, 0.18995794, 0.18995794]
+  folds: 5
+
+TRAIN:
+  # data setting
+  train_gpu: [0, 1, 2, 3]  # [0, 1, 2, 3]
+  train_h: 512
+  train_w: 512
+  scale_min: 0.5  # minimum random scale
+  scale_max: 2.0  # maximum random scale
+  rotate_min: -10  # minimum random rotate
+  rotate_max: 10  # maximum random rotate
+
+  # model setting
+  arch: resnet_unet   # hed
+  sync_bn: True  # adopt syncbn or not
+  upway: bilinear  # if not, using decdonv
+
+  # training setting
+  loss: wbce  # wbce / dilatedbce / dice / focal / focal_dice / dilated_focal
+  optimizer: radam  # adam / sgd
+  edge_weight: 20   # class weight for edge
+  bg_weight: 1
+  dilated_bg_weight: 2
+  workers: 16  # data loader workers
+  batch_size: 60  # batch size for training
+  batch_size_val: 60  #  batch size for validation during training, memory and speed tradeoff
+  base_lr: 0.001
+  epochs: 100
+  start_epoch: 0
+  power: 0.9
+  momentum: 0.9
+  weight_decay: 0.0001
+  binary_threshold: 0.825
+
+  # other setting
+  manual_seed: 47
+  print_freq: 1
+  save_freq: 1
+  model_save_dir: exp/model/
+  weight:  # path to initial weight (default: none)
+  resume:    # path to latest checkpoint (default: none)
+  evaluate: True  # evaluate on validation set, extra gpu memory needed and small batch_size_val is recommend
+
+
+TEST:
+  test_image_dir: /data/ss/URISC/DATASET/IMAGE/test/
+  split: test  # split in [train, val and test]
+  base_size: 1024  # based size for scaling
+  test_h: 512
+  test_w: 512
+  scales: [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2]  # evaluation scales, ms as [1.0, 1.25, 1.5, 1.75, 2]
+  index_start: 0  # evaluation start index in list
+  index_step: 0  # evaluation step index in list, 0 means to end
+  test_gpu: [0]
+  model_path: [100] # [41, 42, 43, 44, 45, 46, 47, 48, 49, 50]  # exp/unet/model/train_epoch_50.pth  # evaluation model path
+  result_save_dir: exp/result/
+  ensemble_way: mean  # mean, max, mean_of_mean_and_max
+  threshold: 0.82
